@@ -22,5 +22,5 @@ while total is None or offset <= total:
             with open(filename, 'w') as out_f:
                 json.dump(record, out_f)
     offset = offset + 45
-    print('Downloaded {0} of {1}'.format(offset, total))
+    print('Downloaded {0} of {1} ({2:.2f}%)'.format(offset, total, offset / total * 100 if total and total > 0 else 0))
     sleep(5)
