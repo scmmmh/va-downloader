@@ -21,13 +21,22 @@ for basepath, dirnames, filenames in os.walk('data'):
                     os.unlink(os.path.join(basepath, filename))
                     os.unlink(os.path.join(basepath, filename.replace('.details.json', '.index.json')))
                 else:
-                    for img in data['fields']['image_set']:
+                    missing = []
+                    for idx, img in enumerate(data['fields']['image_set']):
                         image_filename = img['fields']['local'][img['fields']['local'].rfind('/') + 1:]
                         if not os.path.exists(os.path.join(basepath, image_filename)):
                             response = requests.get(base_url.format(img['fields']['local']))
                             if response.status_code == 200:
                                 with open(os.path.join(basepath, image_filename), 'wb') as out_f:
                                     out_f.write(response.content)
+                            else:
+                                missing.append(idx)
+                            sleep(2)
+                    if missing:
+                        missing.reverse()
+                        for idx in missing:
+                            del data['fields']['image_set'][idx]
+                        with open(os.path.join(basepath, filename), 'w') as out_f:
+                            json.dump(data, out_f)
             count = count + 1
-            sleep(2)
     print('Processed {0} of {1} ({2:.2f}%)'.format(count, total, count / total * 100 if total > 0 else 0))
